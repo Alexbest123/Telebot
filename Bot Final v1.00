@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+import sqlite3
+import random
+import telebot
+from telebot.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+bot = telebot.TeleBot('1736698004:AAHadtbaFtoOHWXJ4ffN_Dn1t-YiOM1buc0')
+print("Чтобы бот заработал, напиши ему '/start'")
+q = []
+
+@bot.message_handler(commands=["start"])
+def send_start_message(message):
+    c = KeyboardButton("/Начать")
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(c)
+    bot.send_message(message.chat.id, ("Приветствуем тебя, Альберт Вэйк! Как ты знаешь, после ядерной войны в 2077 году Земля стала непригодной для человечества, и люди были вынуждены переселиться на гигантский космический корабль Existence-99. Ты родился на этом корабле спустя 53 года после войны.  Появившись на свет, ты был никем, даже не зная своих родителей. Но это только закалило твой характер и помогло стать сильным и смелым человеком. Однако, в 2152 году корабль был захвачен инопланетной расой, но у тебя получилось спрятаться. И только ты сможешь спасти человечество!"), reply_markup = markup)
+@bot.message_handler(commands=["Начать"])
+def send_plot(message):
+    a = KeyboardButton("/Убить генерала и устроить восстание")
+    b = KeyboardButton("/Устроить переговоры")
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(a,b)
+    bot.send_message(message.chat.id,"Зная этот корабль, как свои пять пальцев, ты скрытно проникаешь в командный пункт, где находишь одного из вражеских генералов. Тебе надо решить, каков будет следующий шаг. Но помни, от твоих решений зависит судьба человечества и инопланетной расы.", reply_markup = markup)
+
+@bot.message_handler(commands=["Убить", "Устроить"])
+def send_plot2(message):
+    choice1 = 0
+    if message.text == "/Убить генерала и устроить восстание":
+        choice1 = 1 
+    elif message.text == "/Устроить переговоры":
+        choice1 = 0
+    q.append(choice1)
+    print(q)   
+    d = KeyboardButton("/Cвергнуть собственного отца и прийти к власти")
+    f = KeyboardButton("/Cмириться и пойти по стопам отца")
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(d, f)
+    bot.send_message(message.chat.id,"В это же время на инопланетном корабле сын императора Китон убеждает отца, что нападение на землян было ошибкой. Вернее было бы начать сотрудничество с людьми. Но отец тверд в своем решении и, разозлившись, наказывает Китона за его милосердие. Китон решает:", reply_markup = markup)
+@bot.message_handler(commands=["Cмириться" , "Cвергнуть"])
+def send_end(message):
+    choice2 = 0
+    if message.text == "/Cвергнуть собственного отца и прийти к власти":
+        choice2 = 1
+    elif message.text == "/Cмириться и пойти по стопам отца":  
+        choice2 = 0
+    q.append(choice2)
+    print(q)
+    if q[0]==0 and q[1]==0:
+        bot.send_message(message.chat.id,"Финал №1 из 4. Решение Альберта Вэйка устроить переговоры было ошибкой, так как он не имел тузов в рукаве. Император инопланетной расы казнит Вейка, уничтожая последнюю надежду человечества. Китон станет преемником своего отца. Так началась эра инопланетян, господствующих над людьми.")
+        insertuser1(message)
+        q.clear()
+    elif q[0]==1 and q[1]==1:
+        bot.send_message(message.chat.id,"Финал №2 из 4. После смены власти у инопланетян и восстания людей противоборствующие стороны устроили переговоры. Китон и Альберт Вэйк договорились о мире и взаимовыгодном сотрудничестве. Так началась эра дружбы людей и инопланетян.")
+        insertuser2(message)
+        q.clear()
+    elif q[0]==1 and q[1]==0:
+        bot.send_message(message.chat.id,"Финал №3 из 4. Отец Китона не сумев подавить восстание, приказал покинуть корабль людей. Так началась война между людьми и инопланетянами, длившаяся не один век.")
+        insertuser3(message)
+        q.clear()
+    elif q[0]==0 and q[1]==1:
+        bot.send_message(message.chat.id,"Финал №4 из 4. Альберт Вэйк решает с помощью своих дипломатических способностей добиться мира. К счастью, у инопланетян в это время происходит переворот, и его идея о мире нашла отклик у нового императора Китона. Так начался век крепких дружественных отношений между двумя расами.")
+        insertuser4(message)
+        q.clear()
+    print("END")
+    t = KeyboardButton("/Список игроков")
+    again_ = KeyboardButton("/Начать заново")
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(t, again_)
+    bot.send_message(message.chat.id, "Если хочешь увидеть список игроков, то нажми на конпку '/Список игроков'. Если хочешь перепройти игру на другую концовку, то выбери '/Начать заново' ", reply_markup= markup)
+
+def insertuser1(message):
+    conn = sqlite3.connect(r'D:/abc.db')
+    cursor = conn.cursor()
+    name = f"{message.chat.first_name} {message.chat.last_name}"
+    r = cursor.execute(f"SELECT * FROM ac WHERE id = {message.from_user.id}")
+    r = r.fetchall()
+    print(r)
+    if len(r) == 0:
+        cursor.execute(f"INSERT INTO ac VALUES ('{name}', 1 , {message.from_user.id})")
+        conn.commit() 
+        conn.close()
+        
+    else:
+        cursor.execute(f"UPDATE ac SET lastend = 1 WHERE id = {message.from_user.id}")
+        conn.commit()
+        conn.close()
+          
+def insertuser2(message):
+    conn = sqlite3.connect(r'D:/abc.db')
+    cursor = conn.cursor()
+    name = f"{message.chat.first_name} {message.chat.last_name}"
+    r = cursor.execute(f"SELECT * FROM ac WHERE id = {message.from_user.id}")
+    r = r.fetchall()
+    print(r)
+    if len(r) == 0:
+        cursor.execute(f"INSERT INTO ac VALUES ('{name}', 2 , {message.from_user.id})")
+        conn.commit() 
+        conn.close()
+        
+    else:
+        cursor.execute(f"UPDATE ac SET lastend = 2 WHERE id = {message.from_user.id}")
+        conn.commit()
+        conn.close()
+           
+def insertuser3(message):
+    conn = sqlite3.connect(r'D:/abc.db')
+    cursor = conn.cursor()
+    name = f"{message.chat.first_name} {message.chat.last_name}"
+    r = cursor.execute(f"SELECT * FROM ac WHERE id = {message.from_user.id}")
+    r = r.fetchall()
+    print(r)
+    if len(r) == 0:
+        cursor.execute(f"INSERT INTO ac VALUES ('{name}', 3 , {message.from_user.id})")
+        conn.commit() 
+        conn.close()       
+    else:
+        cursor.execute(f"UPDATE ac SET lastend = 3 WHERE id = {message.from_user.id}")
+        conn.commit()
+        conn.close()
+           
+def insertuser4(message):
+    conn = sqlite3.connect(r'D:/abc.db')
+    cursor = conn.cursor()
+    name = f"{message.chat.first_name} {message.chat.last_name}"
+    r = cursor.execute(f"SELECT * FROM ac WHERE id = {message.from_user.id}")
+    r = r.fetchall()
+    print(r)
+    if len(r) == 0:
+        cursor.execute(f"INSERT INTO ac VALUES ('{name}', 4 , {message.from_user.id})")
+        conn.commit() 
+        conn.close()        
+    else:
+        cursor.execute(f"UPDATE ac SET lastend = 4 WHERE id = {message.from_user.id}")
+        conn.commit()
+        conn.close()
+              
+@bot.message_handler(commands=["Список"])
+def create_top(message):
+    conn = sqlite3.connect(r'D:/abc.db')
+    cur = conn.cursor()  
+    r = cur.execute("SELECT name, lastend FROM ac")
+    r = r.fetchall()
+    list_ = ''
+    for i in r:
+        list_ +=f'Имя: {i[0]}. Последняя концовка: {i[1]}\n'
+    bot.send_message(message.chat.id, list_)
+    conn.close()
+@bot.message_handler(content_types=['text']) 
+def send_top(message):
+    if message.text.lower() != "/начать": 
+        bot.send_message(message.chat.id, "Я тебя не понял. Напиши или нажми '/start', чтобы начать игру.")
+bot.polling()
+# /start
